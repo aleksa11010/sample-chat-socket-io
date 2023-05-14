@@ -6,3 +6,24 @@ form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 
 #messages { list-style-type: none; margin: 0; padding: 0; }
 #messages li { padding: 5px 10px; }
 #messages li:nth-child(odd) { background: #eee; }
+
+.status {
+    position: fixed;
+    top: 0;
+    right: 0;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-bottom-left-radius: 8px;
+    border: 1px solid #ced4da;
+    color: #212529;
+    z-index: 100;
+  }
+  
+  .connected {
+    color: green;
+  }
+  
+  .disconnected {
+    color: red;
+  }
+  

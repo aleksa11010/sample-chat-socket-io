@@ -1,52 +1,69 @@
-import React, { useState, useEffect } from 'react';
-import io from 'socket.io-client';
-import './App.css';
+import React, { useState, useEffect } from "react";
+import io from "socket.io-client";
+import "./App.css";
 
-const socket = io('http://localhost:8000/');
+const socket = io("http://localhost:8000/");
 
 function App() {
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
-  const [room, setRoom] = useState('');
-  const [currentRoom, setCurrentRoom] = useState('');
+  const [room, setRoom] = useState("");
+  const [currentRoom, setCurrentRoom] = useState("");
+  const [status, setStatus] = useState("Disconnected");
 
   useEffect(() => {
-    socket.on('reply', (msg) => {
-      setMessages((oldMessages) => [...oldMessages, msg]);
+    socket.on("connect", () => {
+      setStatus("Connected");
     });
 
-    return () => socket.off('reply');
+    socket.on("disconnect", () => {
+      setStatus("Disconnected");
+    });
+
+    return () => {
+      socket.off("connect");
+      socket.off("disconnect");
+    };
   }, []);
 
   useEffect(() => {
-    socket.on('room message', (msg) => {
+    socket.on("reply", (msg) => {
       setMessages((oldMessages) => [...oldMessages, msg]);
     });
 
-    return () => socket.off('room message');
+    return () => socket.off("reply");
+  }, []);
+
+  useEffect(() => {
+    socket.on("room message", (msg) => {
+      setMessages((oldMessages) => [...oldMessages, msg]);
+    });
+
+    return () => socket.off("room message");
   }, []);
 
   const joinRoom = (e) => {
     e.preventDefault();
-    socket.emit('join_room', room, (data) => {
-      setMessages((oldMessages) => [...oldMessages, 'ACK CALLBACK: ' + data]);
+    socket.emit("join_room", room, (data) => {
+      setMessages((oldMessages) => [...oldMessages, "ACK CALLBACK: " + data]);
       setCurrentRoom(room);
     });
-    setRoom('');
+    setRoom("");
   };
 
   const sendMessage = (e) => {
     e.preventDefault();
-    socket.emit('msg', message, currentRoom, (data) => {
-      setMessages((oldMessages) => [...oldMessages, 'ACK CALLBACK: ' + data]);
+    socket.emit("msg", message, currentRoom, (data) => {
+      setMessages((oldMessages) => [...oldMessages, "ACK CALLBACK: " + data]);
     });
 
-    socket.emit('notice', message);
-    setMessage('');
+    socket.emit("notice", message);
+    setMessage("");
   };
 
   return (
     <div>
+      <div className={`status ${status === "Connected" ? "connected" : "disconnected"}`}>{status}</div>
       <h1>Current Room: {currentRoom}</h1>
       <ul id="messages">
         {messages.map((msg, index) => (
